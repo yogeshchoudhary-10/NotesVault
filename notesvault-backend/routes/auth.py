@@ -38,5 +38,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     
     access_token = create_access_token(data={"sub": user["username"]})
-    return {"access_token": access_token, "token_type": "bearer"}
-#UserCreate, UserInDB, or create_access_token ?
+    return {"access_token": access_token, "token_type": "bearer","user": {
+            "id": str(user.id),
+            "username": user.username}}
+    #UserCreate, UserInDB, or create_access_token ?

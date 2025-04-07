@@ -5,6 +5,14 @@ from routes import auth, notes  # Import your routers
 from config import settings
 from auth import oauth2_scheme
 from fastapi.openapi.utils import get_openapi
+
+from fastapi.staticfiles import StaticFiles
+
+from starlette.requests import Request
+import logging
+
+
+
 # Create FastAPI application
 app = FastAPI(
     title="NotesVault API",
@@ -13,16 +21,31 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
     
 )
-
-# Configure CORS (Cross-Origin Resource Sharing)
-# Adjust these settings for production!
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (update for production)
+    allow_origins=[
+        "https://solid-computing-machine-x5rq6rwpwjqphvxpj-3000.app.github.dev", 
+         # Your exact frontend URL
+        "http://localhost:3000"  # For local testing
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+    expose_headers=["*"]  # Important for auth headers
 )
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logging.info(f"Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    logging.info(f"Response status: {response.status_code}")
+    return response
+
+
+
+
+
+
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
